@@ -23,6 +23,7 @@ The primary purpose of this package is to provide a user-friendly interface for 
     conda create -n localGPT python=3.11
     conda activate localGPT
     poetry install
+    poetry install --with ui  # for the UI
     ```
 2. For GPU support, make sure to setup a C++ compiler, install the CUDA toolkit, verify installation with `nvcc --version` and `nvidia-smi`, and run the following command:  
 For Linux:
