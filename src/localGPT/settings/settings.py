@@ -174,7 +174,7 @@ class QdrantSettings(BaseModel):
         prefer_grpc (bool | None): If True - use gRPC interface for Qdrant.
         https (bool | None): If True - use https for Qdrant.
         api_key (str | None): API key for authentication in Qdrant cloud.
-        prefix (str | None): Prefix to add to the REST URL path. Example: `service/v1` will result in 'http://localhost:6333/service/v1/{qdrant-endpoint}' for REST API.
+        prefix (str | None): Prefix to add to the REST URL path. Example: `service/api` will result in 'http://localhost:6333/service/v1/{qdrant-endpoint}' for REST API.
         timeout (float | None): Timeout for requests to Qdrant.
         host (str | None): Host name of Qdrant service. If url and host are None, set to 'localhost'.
         path (str | None): Persistent path to store QdrantLocal.
