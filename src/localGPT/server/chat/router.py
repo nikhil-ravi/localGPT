@@ -12,7 +12,7 @@ from ...open_ai import (
 )
 from .service import ChatService
 
-chat_router = APIRouter(prefix="/v1")
+chat_router = APIRouter(prefix="/api")
 
 
 class ChatBody(BaseModel):

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from .service import Embedding, EmbeddingService
 
 embeddings_router = APIRouter(
-    prefix="/v1",
+    prefix="/api",
 )
 
 
@@ -38,8 +38,9 @@ class EmbeddingsResponse(BaseModel):
 
 @embeddings_router.post("/embeddings", tags=["embeddings"])
 def embeddings_generation(request: Request, body: EmbeddingsBody) -> EmbeddingsResponse:
-    """
-    Generate embeddings for input texts using the local-gpt model.
+    """Get a vector representation of a given input.
+
+    That vector representation can be easily consumed by machine learning models and algorithms.
 
     Args:
         request (Request): The HTTP request object.

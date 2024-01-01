@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from .model import IngestedDoc
 from .service import IngestService
 
-ingest_router = APIRouter(prefix="/v1")
+ingest_router = APIRouter(prefix="/api")
 
 
 class IngestTextBody(BaseModel):
@@ -40,7 +40,13 @@ class IngestResponse(BaseModel):
 @ingest_router.post("/ingest/file", tags=["ingest"])
 def ingest_file(request: Request, file: UploadFile) -> IngestResponse:
     """
-    Ingests a file and returns the response containing the ingested documents.
+    Ingests and processes a file, storing its chunks to be used as context.
+
+    The context obtained from files is later used in `/chat/completions`, `/completions`, and `/chunks` APIs.
+
+    Most common document formats are supported, but you may be prompted to install an extra dependency to manage a specific file type.
+
+    A file can generate different Documents (for example a PDF generates one Document per page). All Documents IDs are returned in the response, together with the extracted Metadata (which is later used to improve context retrieval). Those IDs can be used to filter the context used to create responses in `/chat/completions`, `/completions`, and `/chunks` APIs.
 
     Args:
         request (Request): The incoming request object.
@@ -59,7 +65,11 @@ def ingest_file(request: Request, file: UploadFile) -> IngestResponse:
 @ingest_router.post("/ingest/text", tags=["ingest"])
 def ingest_text(request: Request, body: IngestTextBody) -> IngestResponse:
     """
-    Ingests text data into the system.
+    Ingests and processes a text, storing its chunks to be used as context.
+
+    The context obtained from files is later used in `/chat/completions`, `/completions`, and `/chunks` APIs.
+
+    A Document will be generated with the given text. The Document ID is returned in the response, together with the extracted Metadata (which is later used to improve context retrieval). That ID can be used to filter the context used to create responses in `/chat/completions`, `/completions`, and `/chunks` APIs.
 
     Args:
         request (Request): The incoming request object.
@@ -75,10 +85,13 @@ def ingest_text(request: Request, body: IngestTextBody) -> IngestResponse:
     return IngestResponse(object="list", model="local-gpt", data=ingest_documents)
 
 
-@ingest_router.post("/ingest/list", tags=["ingest"])
+@ingest_router.get("/ingest/list", tags=["ingest"])
 def list_ingested(request: Request) -> IngestResponse:
     """
-    Retrieve a list of ingested documents.
+    "Lists already ingested Documents including their Document ID and metadata.
+
+    Those IDs can be used to filter the context used to create responses
+    in `/chat/completions`, `/completions`, and `/chunks` APIs.
 
     Args:
         request (Request): The request object.
@@ -94,14 +107,13 @@ def list_ingested(request: Request) -> IngestResponse:
 @ingest_router.delete("/ingest/{doc_id}", tags=["ingest"])
 def delete_ingested(request: Request, doc_id: str) -> None:
     """
-    Deletes the ingested document with the specified ID.
+    "Delete the specified ingested Document.
+
+    The `doc_id` can be obtained from the `GET /ingest/list` endpoint. The document will be effectively deleted from your storage context.
 
     Args:
         request (Request): The request object.
         doc_id (str): The ID of the document to be deleted.
-
-    Returns:
-        None
     """
-    service = request.state.injector.get(IngestService)
+    service: IngestService = request.state.injector.get(IngestService)
     service.delete(doc_id)

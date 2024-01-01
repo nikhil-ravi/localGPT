@@ -5,7 +5,7 @@ from starlette.responses import StreamingResponse
 from ...open_ai import ContextFilter, OpenAICompletion, OpenAIMessage
 from ...server.chat import ChatBody, chat_completion
 
-completions_router = APIRouter(prefix="/v1")
+completions_router = APIRouter(prefix="/api")
 
 
 class CompletionsBody(BaseModel):
@@ -51,8 +51,28 @@ class CompletionsBody(BaseModel):
 def prompt_completion(
     request: Request, body: CompletionsBody
 ) -> OpenAICompletion | StreamingResponse:
-    """
-    Handles the prompt completion request.
+    """We recommend most users use our Chat completions API.
+
+    Given a prompt, the model will return one predicted completion.
+
+    Optionally include a `system_prompt` to influence the way the LLM answers.
+
+    If `use_context` is set to `true`, the model will use context coming  from the ingested documents to create the response. The documents being used can be filtered using the `context_filter` and passing the document IDs to be used. Ingested documents IDs can be found using `/ingest/list` endpoint. If you want all ingested documents to be used, remove `context_filter` altogether.
+
+    When using `'include_sources': true`, the API will return the source Chunks used to create the response, which come from the context provided.
+
+    When using `'stream': true`, the API will return data chunks following [OpenAI's streaming model](https://platform.openai.com/docs/api-reference/chat/streaming):
+    ```
+    {
+        "id":"12345",
+        "object":"completion.chunk",
+        "created":1694268190,
+        "model":"private-gpt",
+        "choices":[
+            {"index":0,"delta":{"content":"Hello"}, "finish_reason":null}
+        ]
+    }
+    ```
 
     Args:
         request (Request): The HTTP request object.
